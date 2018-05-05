@@ -129,7 +129,6 @@ T_SLONG		rsl_milisecondCounts = 0U;
 T_SBYTE 	rsb_SecondCount= 0u;
 T_SBYTE		rsb_DecadeSecondCount= 0u;
 T_SBYTE		rsb_HundredSecondCount= 0u;
-
 T_SBYTE		rsb_Type_Mode;
 T_SBYTE		rsb_Digito_unidad = 0;
 T_SBYTE		rsb_Digito_decena = 0;
@@ -148,24 +147,18 @@ int main(void)
 	/* define init structure for the ADC */
 	adc16_config_t adc16ConfigStruct;
 	adc16_channel_config_t adc16ChannelConfigStruct;
-
-
     /* Define the init structure for the output LED pin*/
-
 	gpio_pin_config_t led_config = {
         kGPIO_DigitalOutput, 0,
     };
     gpio_pin_config_t button_config = {
     	kGPIO_DigitalInput, 0,
         };
-
     tpm_config_t tpmInfo;
-
     /* Board pin, clock, debug console init */
     BOARD_InitPins();
     BOARD_BootClockRUN();
     BOARD_InitDebugConsole();
-
     /* configure ADC*/
     adc16ConfigStruct.referenceVoltageSource = kADC16_ReferenceVoltageSourceVref;
     adc16ConfigStruct.clockSource = kADC16_ClockSourceAsynchronousClock;
@@ -257,15 +250,11 @@ int main(void)
     		switch (rsb_Type_Mode)
     		{
     		case 0u:
-
     			Cuenta();
     			break;
-
     		case 1u:
-
     			ContadorManual();
     			break;
-
     		default:
     		    ADC16_SetChannelConfig(DEMO_ADC16_BASE, DEMO_ADC16_CHANNEL_GROUP, &adc16ChannelConfigStruct);
     		    while (0U == (kADC16_ChannelConversionDoneFlag &
@@ -274,10 +263,7 @@ int main(void)
     		    }
     			ADC();
     			break;
-
     		}
-
-
         __WFI();
     }
 }
@@ -331,7 +317,6 @@ void Cuenta(void){
         rbi_tpmIsrFlag = false;
         if(rsl_milisecondCounts >= SECONDLOOP)
         {
-//
         	rsb_SecondCount++;
             rsl_milisecondCounts = 0U;
         }
@@ -667,11 +652,7 @@ void ContadorManual(void)
 
 	    				 			}
 	    		}
-//	    		while(GPIO_ReadPinInput(BUTTON_PLUS, BUTTON_PLUS_PIN)==TRUE && rsb_SecondCount>=1u)
-//	    			    		{
-//	    			rsb_Digito_unidad++;
-//	    			break;
-//	    			    		}
+
 	    		rsb_Digito_unidad++;
 	    	}
 
@@ -688,11 +669,6 @@ void ContadorManual(void)
 	    				   				break;
 	    				 			}
 	    		}
-//	    		while(GPIO_ReadPinInput(BUTTON_SUB, BUTTON_SUB_PIN)==TRUE && SecondCount>=1u)
-//	    			    		{
-//	    			rsb_Digito_unidad--;
-//	    			break;
-//	    			    		}
 	    		rsb_Digito_unidad--;
 	    	}
 }
