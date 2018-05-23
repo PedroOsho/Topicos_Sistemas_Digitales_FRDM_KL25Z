@@ -86,6 +86,10 @@
 #define BOARD_LED_BLUE_GPIO_PORT PORTD
 #define BOARD_LED_BLUE_GPIO_PIN 1U
 
+#define RX_LIN_PORT_ GPIOB
+#define RX_LIN_PORT__ PORTB
+#define RX_LIN_PIN_ 0u
+
 #define LED_RED_INIT(output)                                                 \
     GPIO_WritePinOutput(BOARD_LED_RED_GPIO, BOARD_LED_RED_GPIO_PIN, output); \
     BOARD_LED_RED_GPIO->PDDR |= (1U << BOARD_LED_RED_GPIO_PIN) /*!< Enable target LED_RED */
