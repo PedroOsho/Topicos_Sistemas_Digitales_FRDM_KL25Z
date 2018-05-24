@@ -172,9 +172,9 @@ int main(void)
     PRINTF("\r\nOnce the input signal is received the input capture value is printed\r\n");
 
     //GPIO_PinInit(BOARD_LED_GPIO, BOARD_LED_GPIO_PIN, &led_config);
-    GPIO_PinInit( LED_G_GPIO, LED_G_GREEN_GPIO, &led_config);
-    GPIO_PinInit( LED_R_GPIO, LED_R_RED_GPIO, &led_config);
-    GPIO_PinInit( LED_B_GPIO, LED_B_BLUE_GPIO, &led_config);
+    GPIO_PinInit(LED_G_GPIO, LED_G_GPIO_PIN, &led_config);
+    GPIO_PinInit(LED_R_GPIO, LED_R_GPIO_PIN, &led_config);
+    GPIO_PinInit(LED_B_GPIO, LED_B_GPIO_PIN, &led_config);
 
     TPM_GetDefaultConfig(&tpmInfo);
     /* Initialize TPM module */
@@ -255,7 +255,7 @@ void BRAKE_FUNCT(void){
 
 		}
 		else if (BRAKE_ARRAY_POSITION>7 && BRAKE_ARRAY_POSITION<10){
-				if(BIT_RATED >= BIT_RATED_28800)
+				if(BIT_RATED >= BIT_RATED_19200)
 				{
 					//escribir el valor del puerto en BRAKE_ARRAY[BRAKE_ARRAY_POSITION]
 					if(GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN)==0){
@@ -274,7 +274,7 @@ void BRAKE_FUNCT(void){
 
 		}
 		else if (BRAKE_ARRAY_POSITION>9 && BRAKE_ARRAY_POSITION<13){
-				if(BIT_RATED >= BIT_RATED_14400)
+				if(BIT_RATED >= BIT_RATED_9600)
 				{
 					if(GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN)==0){
 					BRAKE_ARRAY[BRAKE_ARRAY_POSITION]=0;
