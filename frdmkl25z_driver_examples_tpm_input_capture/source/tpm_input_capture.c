@@ -36,6 +36,16 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+#define LED_G_GPIO LED_G_GREEN_GPIO
+#define LED_G_GPIO_PIN LED_G_GREEN_GPIO_PIN
+
+#define LED_R_GPIO LED_R_RED_GPIO
+#define LED_R_GPIO_PIN LED_R_RED_GPIO_PIN
+
+#define LED_B_GPIO LED_G_BLUE_GPIO
+#define LED_B_GPIO_PIN LED_G_BLUE_GPIO_PIN
+
+
 #define DEMO_TPM_BASEADDR TPM1
 
 /* TPM channel used for input capture */
@@ -97,6 +107,17 @@ uint8_t		ID_BYTE=0;
 
 uint8_t		DATA_LONG=0;
 
+T_BIT		DATA_ARRAY[64];
+uint8_t		DATA_ARRAY_POSITION;
+
+uint16_t	DATA_2BYTES;
+uint32_t	DATA_4BYTES;
+uint64_t	DATA_8BYTES;
+
+uint8_t 	CS_ARRAY_POSITION=0;
+uint8_t		CS_BYTE;
+uint8_t		CHECK_SUM=0;
+
 enum State_enum {
     BRAKE,
     SYNC,
@@ -134,7 +155,9 @@ int main(void)
 {
     tpm_config_t tpmInfo;
     tpm_config_t tpmInfo2;
-
+	gpio_pin_config_t led_config = {
+        kGPIO_DigitalOutput, 0,
+    };
 
     /* Board pin, clock, debug console init */
     BOARD_InitPins();
@@ -147,6 +170,11 @@ int main(void)
     /* Print a note to terminal */
     PRINTF("\r\nTPM input capture example\r\n");
     PRINTF("\r\nOnce the input signal is received the input capture value is printed\r\n");
+
+    //GPIO_PinInit(BOARD_LED_GPIO, BOARD_LED_GPIO_PIN, &led_config);
+    GPIO_PinInit( LED_G_GPIO, LED_G_GREEN_GPIO, &led_config);
+    GPIO_PinInit( LED_R_GPIO, LED_R_RED_GPIO, &led_config);
+    GPIO_PinInit( LED_B_GPIO, LED_B_BLUE_GPIO, &led_config);
 
     TPM_GetDefaultConfig(&tpmInfo);
     /* Initialize TPM module */
@@ -214,6 +242,7 @@ void BRAKE_FUNCT(void){
 					if(GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN)==0){
 					BRAKE_ARRAY[BRAKE_ARRAY_POSITION]=0;
 					BRAKE_ARRAY_POSITION++;
+					CHECK_SUM++;
 					BIT_RATED=0;
 					Slave_MS(BRAKE);
 					}
@@ -232,6 +261,7 @@ void BRAKE_FUNCT(void){
 					if(GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN)==0){
 					BRAKE_ARRAY[BRAKE_ARRAY_POSITION]=0;
 					BRAKE_ARRAY_POSITION++;
+					CHECK_SUM++;
 					BIT_RATED=0;
 					Slave_MS(BRAKE);
 					}
@@ -249,6 +279,7 @@ void BRAKE_FUNCT(void){
 					if(GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN)==0){
 					BRAKE_ARRAY[BRAKE_ARRAY_POSITION]=0;
 					BRAKE_ARRAY_POSITION++;
+					CHECK_SUM++;
 					BIT_RATED=0;
 					Slave_MS(BRAKE);
 					}
@@ -269,19 +300,21 @@ void BRAKE_FUNCT(void){
 }
 
 void SYNC_FUNCT(void){
-	if(BRAKE_ARRAY_POSITION<8){
+	if(SYNC_ARRAY_POSITION<8){
 					if(BIT_RATED >= BIT_RATED_9600)
 					{
 						//escribir el valor del puerto en BRAKE_ARRAY[BRAKE_ARRAY_POSITION]
 						if(GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN)==0){
 						SYNC_ARRAY[SYNC_ARRAY_POSITION]=0;
-						BRAKE_ARRAY_POSITION++;
+						SYNC_ARRAY_POSITION++;
+						CHECK_SUM++;
 						BIT_RATED=0;
 						}
 						else
 						{
 						SYNC_ARRAY[SYNC_ARRAY_POSITION]=1;
-						BRAKE_ARRAY_POSITION++;
+						SYNC_ARRAY_POSITION++;
+						CHECK_SUM++;
 						BIT_RATED=0;
 						}
 					}
@@ -305,6 +338,7 @@ void ID_FUNCT(void){
 		ID_BYTE<<=1;
 		ID_BYTE=+GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN);
 		ID_ARRAY_POSITION++;
+		CHECK_SUM++;
 		Slave_MS(ID);
 		}
 	}
@@ -320,15 +354,91 @@ void ID_FUNCT(void){
 				DATA_LONG=4;
 			}
 			else if((ID_BYTE & 0x0C) == 0x0C){
-				DATA_LONG=8
+				DATA_LONG=8;
 			}
 			else{}
-			Slave_MS(DATA_FUNCT);
+			Slave_MS(DATA);
 		}
 		else{
 		}
 	}
 }
-void DATA_FUNCT(void){}
-void CS_FUNCT(void){}
+void DATA_FUNCT(void){
+	if(DATA_ARRAY_POSITION<64){
+		if(BIT_RATED >= BIT_RATED_9600)
+		{
+			CHECK_SUM++;
+			if(DATA_LONG==2){
+				if(DATA_ARRAY_POSITION<16)
+				{
+					DATA_2BYTES<<=1;
+					DATA_2BYTES=+GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN);
+					DATA_ARRAY[DATA_ARRAY_POSITION]=GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN);
+					DATA_ARRAY_POSITION++;
+					BIT_RATED=0;
+
+				}
+				else
+				{
+					DATA_ARRAY[DATA_ARRAY_POSITION]=GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN);
+					DATA_ARRAY_POSITION++;
+					BIT_RATED=0;
+				}
+			}
+			else if(DATA_LONG==34){
+				if(DATA_ARRAY_POSITION<34)
+				{
+					DATA_4BYTES<<=1;
+					DATA_4BYTES=+GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN);
+					DATA_ARRAY[DATA_ARRAY_POSITION]=GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN);
+					DATA_ARRAY_POSITION++;
+					BIT_RATED=0;
+
+				}
+				else
+				{
+					DATA_ARRAY[DATA_ARRAY_POSITION]=GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN);
+					DATA_ARRAY_POSITION++;
+					BIT_RATED=0;
+				}
+			}
+			else{
+					DATA_8BYTES<<=1;
+					DATA_8BYTES=+GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN);
+					DATA_ARRAY[DATA_ARRAY_POSITION]=GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN);
+					DATA_ARRAY_POSITION++;
+					BIT_RATED=0;
+				}
+
+		}
+		Slave_MS(DATA);
+	}
+	else{
+		BIT_RATED=0;
+		DATA_ARRAY_POSITION=0;
+		Slave_MS(CS);
+
+	}
+}
+void CS_FUNCT(void){
+	if(CS_ARRAY_POSITION<64){
+		if(BIT_RATED >= BIT_RATED_9600)
+		{
+				CS_BYTE<<=1;
+				CS_BYTE=+GPIO_ReadPinInput(RX_LIN_PORT, RX_LIN_PIN);
+				CS_ARRAY_POSITION++;
+				Slave_MS(CS);
+		}
+	}
+	else{
+		if(CHECK_SUM==CS_BYTE){
+
+		}
+		else{
+
+		}
+	}
+
+}
+
 void ERROR_FUNCT(){}

@@ -46,6 +46,8 @@ PinsProfile:
 #define PIN0_IDX                         0u   /*!< Pin number for pin 0 in a port */
 #define PIN1_IDX                         1u   /*!< Pin number for pin 1 in a port */
 #define PIN2_IDX                         2u   /*!< Pin number for pin 2 in a port */
+#define PIN3_IDX                         3u   /*!< Pin number for pin 2 in a port */
+#define PIN7_IDX                         7u   /*!< Pin number for pin 2 in a port */
 #define SOPT4_TPM1CH0SRC_TPM1_CH0     0x00u   /*!< TPM1 channel 0 input capture source select: TPM1_CH0 signal */
 #define SOPT5_UART0RXSRC_UART_RX      0x00u   /*!< UART0 receive data source select: UART0_RX pin */
 #define SOPT5_UART0TXSRC_UART_TX      0x00u   /*!< UART0 transmit data source select: UART0_TX pin */
@@ -70,6 +72,11 @@ BOARD_InitPins:
 void BOARD_InitPins(void) {
   CLOCK_EnableClock(kCLOCK_PortA);                           /* Port A Clock Gate Control: Clock enabled */
   CLOCK_EnableClock(kCLOCK_PortB);                           /* Port B Clock Gate Control: Clock enabled */
+  CLOCK_EnableClock(kCLOCK_PortC);                           /* Port B Clock Gate Control: Clock enabled */
+
+  PORT_SetPinMux(PORTC, PIN0_IDX, kPORT_MuxAsGpio);
+  PORT_SetPinMux(PORTC, PIN3_IDX, kPORT_MuxAsGpio);
+  PORT_SetPinMux(PORTC, PIN7_IDX, kPORT_MuxAsGpio);
 
   PORT_SetPinMux(PORTA, PIN1_IDX, kPORT_MuxAlt2);            /* PORTA1 (pin 27) is configured as UART0_RX */
   PORT_SetPinMux(PORTA, PIN2_IDX, kPORT_MuxAlt2);            /* PORTA2 (pin 28) is configured as UART0_TX */
